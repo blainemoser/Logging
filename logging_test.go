@@ -34,6 +34,30 @@ func TestLog(t *testing.T) {
 	checkWrite(t)
 }
 
+func TestGetLog(t *testing.T) {
+	err := l.l.Write("test write for get log one", "INFO")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = l.l.Write("test write for get log two", "INFO")
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := l.l.GetLog(2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result) != 2 {
+		t.Fatalf("expected get log to contain two results, got %d", len(result))
+	}
+	if !strings.Contains(result[0], "test write for get log two") {
+		t.Errorf("expected log result to contain '%s', got %s", "test write for get log two", result[0])
+	}
+	if !strings.Contains(result[1], "test write for get log one") {
+		t.Errorf("expected log result to contain '%s', got %s", "test write for get log one", result[1])
+	}
+}
+
 func initialiseTest() {
 	err := spinTestLog()
 	if err != nil {
