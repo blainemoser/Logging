@@ -15,7 +15,11 @@ type logTest struct {
 	l             *Log
 }
 
-var l *logTest
+var (
+	l          *logTest
+	testLog    string = "test write for get log one\nwith a few\nnewlines"
+	testLogTwo string = "test write for get log two\nplus this line"
+)
 
 func TestMain(m *testing.M) {
 	initialiseTest()
@@ -35,11 +39,11 @@ func TestLog(t *testing.T) {
 }
 
 func TestGetLog(t *testing.T) {
-	err := l.l.Write("test write for get log one", "INFO")
+	err := l.l.Write(fmt.Sprintf(testLog), "INFO")
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = l.l.Write("test write for get log two", "INFO")
+	err = l.l.Write(testLogTwo, "INFO")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,11 +54,11 @@ func TestGetLog(t *testing.T) {
 	if len(result) != 2 {
 		t.Fatalf("expected get log to contain two results, got %d", len(result))
 	}
-	if !strings.Contains(result[0], "test write for get log two") {
-		t.Errorf("expected log result to contain '%s', got %s", "test write for get log two", result[0])
+	if !strings.Contains(result[0], testLogTwo) {
+		t.Errorf("expected log result to contain '%s', got %s", testLogTwo, result[0])
 	}
 	if !strings.Contains(result[1], "test write for get log one") {
-		t.Errorf("expected log result to contain '%s', got %s", "test write for get log one", result[1])
+		t.Errorf("expected log result to contain '%s', got %s", testLog, result[1])
 	}
 }
 

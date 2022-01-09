@@ -97,11 +97,7 @@ func (l *Log) iterateReadChunks(fileSize int64, lines int, size, chunk, count *i
 		return nil, err
 	}
 	split := strings.Split(string(b), "\n")
-	for i := len(split) - 1; i > 0; i-- {
-		if dateForm.Match([]byte(split[i])) {
-			r = append(r, split[i])
-		}
-	}
+	l.iterateChunkSplit(split, &r)
 	if len(r) >= lines {
 		return r[0:lines], nil
 	}
@@ -109,6 +105,32 @@ func (l *Log) iterateReadChunks(fileSize int64, lines int, size, chunk, count *i
 	*size = chunkSize * int64(lines) * *count
 	*chunk = fileSize - *size
 	return nil, nil
+}
+
+func (l *Log) iterateChunkSplit(split []string, result *[]string) {
+	node := make([]string, 0)
+	for i := len(split) - 1; i > 0; i-- {
+		if dateForm.MatchString(split[i]) {
+			node = append(node, split[i])
+			l.reverseNode(&node)
+			*result = append(*result, strings.Trim(strings.Join(node, "\n"), " "))
+			node = make([]string, 0)
+			continue
+		}
+		node = append(node, strings.Trim(split[i], " "))
+	}
+}
+
+func (l *Log) reverseNode(node *[]string) {
+	if len(*node) < 2 {
+		return
+	}
+	var place string
+	for i := 0; i < len(*node)/2; i++ {
+		place = (*node)[i]
+		(*node)[i] = (*node)[len(*node)-1-i]
+		(*node)[len(*node)-1-i] = place
+	}
 }
 
 func (l *Log) ErrLog(e error, fatal bool) {
