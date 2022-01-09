@@ -54,6 +54,11 @@ func (l *Log) logMessage(level, message string) []byte {
 	)
 }
 
+// Path returns the file path
+func (l *Log) Path() string {
+	return l.path
+}
+
 // GetLog returns lines of the log
 func (l *Log) GetLog(lines uint) (result []string, err error) {
 	err = l.openLogForRead()
