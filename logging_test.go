@@ -16,9 +16,10 @@ type logTest struct {
 }
 
 var (
-	l          *logTest
-	testLog    string = "test write for get log one\nwith a few\nnewlines"
-	testLogTwo string = "test write for get log two\nplus this line"
+	l           *logTest
+	testLog     string = "test write for get log one\nwith a few\nnewlines"
+	testLogTwo  string = "test write for get log two\nplus this line"
+	testLogPath string
 )
 
 func TestMain(m *testing.M) {
@@ -62,6 +63,12 @@ func TestGetLog(t *testing.T) {
 	}
 }
 
+func TestLogPath(t *testing.T) {
+	if l.l.Path() != testLogPath {
+		t.Errorf("expected test log path to be %s, got %s", testLogPath, l.l.Path())
+	}
+}
+
 func initialiseTest() {
 	err := spinTestLog()
 	if err != nil {
@@ -79,8 +86,9 @@ func tearDownTest() {
 }
 
 func spinTestLog() error {
+	testLogPath = fmt.Sprintf("%d__tmp_test_log.log", time.Now().Unix())
 	l = &logTest{
-		filePath: fmt.Sprintf("%d__tmp_test_log.log", time.Now().Unix()),
+		filePath: testLogPath,
 		env:      "TEST",
 	}
 	var err error
