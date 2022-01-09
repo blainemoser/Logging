@@ -48,18 +48,47 @@ func TestGetLog(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	getLogOne(t)
+	getLogTwo(t)
+}
+
+func getLogOne(t *testing.T) {
 	result, err := l.l.GetLog(2)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
+		return
 	}
 	if len(result) != 2 {
-		t.Fatalf("expected get log to contain two results, got %d", len(result))
+		t.Errorf("expected get log to contain two results, got %d", len(result))
+		return
 	}
 	if !strings.Contains(result[0], testLogTwo) {
 		t.Errorf("expected log result to contain '%s', got %s", testLogTwo, result[0])
 	}
 	if !strings.Contains(result[1], "test write for get log one") {
 		t.Errorf("expected log result to contain '%s', got %s", testLog, result[1])
+	}
+}
+
+func getLogTwo(t *testing.T) {
+	result, err := l.l.GetLog(200) // should get the whole log
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(result) < 2 {
+		t.Errorf("expected get log to contain at least two results, got %d", len(result))
+		return
+	}
+	hasinit := false
+	for _, v := range result {
+		if strings.Contains(v, "initialising log") {
+			hasinit = true
+			break
+		}
+	}
+	if !hasinit {
+		t.Errorf("expected get log to return all lines including the initialising line, got %s", strings.Join(result, "\n"))
 	}
 }
 

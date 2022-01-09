@@ -97,9 +97,13 @@ func (l *Log) readChunks(lines, fileSize int64, result *[]string) error {
 func (l *Log) iterateReadChunks(fileSize int64, lines int, size, chunk, count *int64) ([]string, error) {
 	r := make([]string, 0)
 	b := make([]byte, *size)
-	_, err := l.file.ReadAt(b, *chunk)
+	var err error
+	_, err = l.file.ReadAt(b, *chunk)
 	if err != nil {
-		return nil, err
+		if strings.Contains(err.Error(), "negative offset") {
+			return l.wholeRead(fileSize)
+		}
+		return []string{}, err
 	}
 	split := strings.Split(string(b), "\n")
 	l.iterateChunkSplit(split, &r)
@@ -110,6 +114,28 @@ func (l *Log) iterateReadChunks(fileSize int64, lines int, size, chunk, count *i
 	*size = chunkSize * int64(lines) * *count
 	*chunk = fileSize - *size
 	return nil, nil
+}
+
+func (l *Log) wholeRead(fileSize int64) ([]string, error) {
+	b := make([]byte, fileSize)
+	_, err := l.file.Read(b)
+	if err != nil {
+		return []string{}, err
+	}
+	splitLog := strings.Split(string(b), "\n")
+	node := make([]string, 0)
+	result := make([]string, 0)
+	for _, v := range splitLog {
+		if dateForm.MatchString(v) {
+			node = append(node, v)
+			l.reverseNode(&node)
+			result = append(result, strings.Trim(strings.Join(node, "\n"), " "))
+			node = make([]string, 0)
+			continue
+		}
+		node = append(node, strings.Trim(v, " "))
+	}
+	return result, nil
 }
 
 func (l *Log) iterateChunkSplit(split []string, result *[]string) {
