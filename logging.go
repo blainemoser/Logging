@@ -125,15 +125,18 @@ func (l *Log) wholeRead(fileSize int64) ([]string, error) {
 	splitLog := strings.Split(string(b), "\n")
 	node := make([]string, 0)
 	result := make([]string, 0)
-	for _, v := range splitLog {
+	for i, v := range splitLog {
 		if dateForm.MatchString(v) {
-			node = append(node, v)
-			l.reverseNode(&node)
-			result = append(result, strings.Trim(strings.Join(node, "\n"), " "))
-			node = make([]string, 0)
+			if len(node) > 0 {
+				result = append(result, strings.Trim(strings.Join(node, "\n"), " "))
+			}
+			node = []string{v}
 			continue
 		}
 		node = append(node, strings.Trim(v, " "))
+		if i == len(splitLog)-1 && len(node) > 0 {
+			result = append(result, strings.Trim(strings.Join(node, "\n"), " "))
+		}
 	}
 	return result, nil
 }

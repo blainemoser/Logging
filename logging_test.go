@@ -40,7 +40,7 @@ func TestLog(t *testing.T) {
 }
 
 func TestGetLog(t *testing.T) {
-	err := l.l.Write(fmt.Sprintf(testLog), "INFO")
+	err := l.l.Write(testLog, "INFO")
 	if err != nil {
 		t.Fatal(err)
 	}
