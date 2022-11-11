@@ -35,8 +35,21 @@ func TestErrorLog(t *testing.T) {
 }
 
 func TestLog(t *testing.T) {
-	l.l.Write("test write", "INFO")
-	checkWrite(t)
+	l.l.Write("test write", INFO)
+	checkWrite(t, INFO, "test write")
+}
+
+func TestLevels(t *testing.T) {
+	l.l.Success("success")
+	checkWrite(t, SUCCESS, "success")
+	l.l.Debug("debug")
+	checkWrite(t, DEBUG, "debug")
+	l.l.Error("error")
+	checkWrite(t, ERROR, "error")
+	l.l.Warning("warning")
+	checkWrite(t, WARNING, "warning")
+	l.l.Info("info")
+	checkWrite(t, INFO, "info")
 }
 
 func TestGetLog(t *testing.T) {
@@ -140,7 +153,7 @@ func checkError(t *testing.T) {
 	}
 }
 
-func checkWrite(t *testing.T) {
+func checkWrite(t *testing.T, level, message string) {
 	content, err := getFileContent()
 	if err != nil {
 		t.Fatal(err)
@@ -150,8 +163,8 @@ func checkWrite(t *testing.T) {
 		t.Fatalf("expected at least two logs to have been written, got %d", len(contentSplit))
 	}
 	lastLog := contentSplit[len(contentSplit)-1]
-	if !strings.Contains(lastLog, "[TEST.INFO] test write") {
-		t.Errorf("expected last log to contain '%s', got '%s'", "test write", lastLog)
+	if !strings.Contains(lastLog, fmt.Sprintf("[TEST.%s] %s", level, message)) {
+		t.Errorf("expected last log to contain '%s', got '%s'", fmt.Sprintf("[TEST.%s] %s", level, message), lastLog)
 	}
 }
 

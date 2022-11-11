@@ -9,6 +9,18 @@ import (
 	"time"
 )
 
+const (
+	ERROR = "ERROR"
+
+	WARNING = "WARNING"
+
+	INFO = "INFO"
+
+	SUCCESS = "SUCCESS"
+
+	DEBUG = "DEBUG"
+)
+
 type Log struct {
 	path, env string
 	file      *os.File
@@ -40,6 +52,26 @@ func (l *Log) Write(message, level string) (err error) {
 	defer l.file.Close()
 	_, err = l.file.Write(l.logMessage(level, message))
 	return err
+}
+
+func (l *Log) Error(message string) (err error) {
+	return l.Write(message, ERROR)
+}
+
+func (l *Log) Success(message string) (err error) {
+	return l.Write(message, SUCCESS)
+}
+
+func (l *Log) Warning(message string) (err error) {
+	return l.Write(message, WARNING)
+}
+
+func (l *Log) Debug(message string) (err error) {
+	return l.Write(message, DEBUG)
+}
+
+func (l *Log) Info(message string) (err error) {
+	return l.Write(message, INFO)
 }
 
 func (l *Log) logMessage(level, message string) []byte {
