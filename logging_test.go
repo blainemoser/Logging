@@ -126,8 +126,36 @@ func TestLogPath(t *testing.T) {
 	}
 }
 
+func TestReporting(t *testing.T) {
+	err := spinTestLog(LEVEL_ERROR, REPORT_LEVEL_DEBUG)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := fmt.Sprintf("%s: %d", "expects a report here but not a log", time.Now().Unix())
+	l.l.Debug(msg)
+	content, err := getFileContent()
+	if err != nil {
+		t.Fatal(err)
+	}
+	contentSplit := strings.Split(strings.Trim(string(content), "\n"), "\n")
+	lastLog := contentSplit[len(contentSplit)-1]
+	if strings.Contains(lastLog, msg) {
+		t.Errorf("expected message '%s' to be omitted from the log", msg)
+	}
+}
+
+func TestCustomLevel(t *testing.T) {
+	err := spinTestLog(LEVEL_ERROR, REPORT_LEVEL_NONE) // Lowest possible sensitivity
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := fmt.Sprintf("%s: %d", "expects a report here and a log because we always log custom levels", time.Now().Unix())
+	l.l.Write(msg, "CUSTOMLEVEL")
+	checkWrite(t, "CUSTOMLEVEL", msg)
+}
+
 func initialiseTest() {
-	err := spinTestLog()
+	err := spinTestLog(LEVEL_INFO, REPORT_LEVEL_INFO)
 	if err != nil {
 		os.Remove(l.filePath)
 		panic(err)
@@ -142,14 +170,14 @@ func tearDownTest() {
 	}
 }
 
-func spinTestLog() error {
+func spinTestLog(logLevel, reportLevel int) error {
 	testLogPath = fmt.Sprintf("%d__tmp_test_log.log", time.Now().Unix())
 	l = &logTest{
 		filePath: testLogPath,
 		env:      "TEST",
 	}
 	var err error
-	l.l, err = NewLog(l.filePath, l.env)
+	l.l, err = NewLog(l.filePath, l.env, logLevel, reportLevel)
 	return err
 }
 

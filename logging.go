@@ -10,20 +10,41 @@ import (
 )
 
 const (
-	ERROR = "ERROR"
-
-	WARNING = "WARNING"
-
-	INFO = "INFO"
-
-	SUCCESS = "SUCCESS"
-
-	DEBUG = "DEBUG"
+	ERROR                = "ERROR"
+	WARNING              = "WARNING"
+	INFO                 = "INFO"
+	SUCCESS              = "SUCCESS"
+	DEBUG                = "DEBUG"
+	LEVEL_ERROR          = 0
+	LEVEL_WARNING        = 1
+	LEVEL_DEBUG          = 2
+	LEVEL_INFO           = 2
+	REPORT_LEVEL_NONE    = 0
+	REPORT_LEVEL_ERROR   = 1
+	REPORT_LEVEL_WARNING = 2
+	REPORT_LEVEL_DEBUG   = 3
+	REPORT_LEVEL_INFO    = 3
 )
 
+var logLevels map[string]int = map[string]int{
+	ERROR:   LEVEL_ERROR,
+	WARNING: LEVEL_WARNING,
+	INFO:    LEVEL_INFO,
+	DEBUG:   LEVEL_DEBUG,
+}
+
+var reportLevels map[string]int = map[string]int{
+	ERROR:   REPORT_LEVEL_ERROR,
+	WARNING: REPORT_LEVEL_WARNING,
+	INFO:    REPORT_LEVEL_INFO,
+	DEBUG:   REPORT_LEVEL_DEBUG,
+}
+
 type Log struct {
-	path, env string
-	file      *os.File
+	level       int
+	reportLevel int
+	path, env   string
+	file        *os.File
 }
 
 const chunkSize = 50
@@ -32,10 +53,12 @@ var (
 	dateForm = regexp.MustCompile(`^\[\d{4}-\d{2}-\d{2}(.*?)$`)
 )
 
-func NewLog(path, env string) (l *Log, err error) {
+func NewLog(path, env string, logLevel, reportLevel int) (l *Log, err error) {
 	l = &Log{
-		path: path,
-		env:  env,
+		level:       getLogLevel(logLevel),
+		reportLevel: getReportLevel(reportLevel),
+		path:        path,
+		env:         env,
 	}
 	err = l.Write("initialising log", "INFO")
 	if err != nil {
@@ -45,12 +68,17 @@ func NewLog(path, env string) (l *Log, err error) {
 }
 
 func (l *Log) Write(message, level string) (err error) {
+	msg := l.logMessage(level, message)
+	l.report(level, msg)
+	if !l.shouldWrite(level) {
+		return
+	}
 	err = l.openLogForWrite()
 	if err != nil {
 		return err
 	}
 	defer l.file.Close()
-	_, err = l.file.Write(l.logMessage(level, message))
+	_, err = l.file.Write(msg)
 	return err
 }
 
@@ -254,4 +282,48 @@ func (l *Log) openLogForRead() error {
 	}
 	l.file = file
 	return err
+}
+
+func (l *Log) shouldWrite(level string) bool {
+	level = strings.ToUpper(level)
+	logLevel, ok := logLevels[level]
+	if !ok {
+		return true // we don't impose logging restrictions for custom levels
+	}
+	return logLevel <= l.level
+}
+
+func (l *Log) report(level string, msg []byte) {
+	if l.reportLevel <= REPORT_LEVEL_NONE {
+		return
+	}
+	reportLevel, ok := reportLevels[level]
+	if !ok || reportLevel <= l.reportLevel {
+		reportMsg(msg)
+		return
+	}
+}
+
+func reportMsg(msg []byte) {
+	log.Println(string(msg))
+}
+
+func getLogLevel(level int) int {
+	if level <= 0 {
+		return LEVEL_ERROR
+	}
+	if level > LEVEL_DEBUG {
+		return LEVEL_DEBUG // highest level
+	}
+	return level
+}
+
+func getReportLevel(level int) int {
+	if level <= 0 {
+		return REPORT_LEVEL_NONE
+	}
+	if level > REPORT_LEVEL_DEBUG {
+		return REPORT_LEVEL_DEBUG // highest level
+	}
+	return level
 }
