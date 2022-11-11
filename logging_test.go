@@ -52,6 +52,21 @@ func TestLevels(t *testing.T) {
 	checkWrite(t, INFO, "info")
 }
 
+func TestLevelsf(t *testing.T) {
+	args := []interface{}{"testing", 12, 3.44534, false}
+	msg := fmt.Sprintf("%s, %d, %2.f, %t", args...)
+	l.l.Successf("success %s, %d, %2.f, %t", "testing", 12, 3.44534, false)
+	checkWrite(t, SUCCESS, fmt.Sprintf("success %s", msg))
+	l.l.Debugf("debug %s, %d, %2.f, %t", "testing", 12, 3.44534, false)
+	checkWrite(t, DEBUG, fmt.Sprintf("debug %s", msg))
+	l.l.Errorf("error %s, %d, %2.f, %t", "testing", 12, 3.44534, false)
+	checkWrite(t, ERROR, fmt.Sprintf("error %s", msg))
+	l.l.Warningf("warning %s, %d, %2.f, %t", "testing", 12, 3.44534, false)
+	checkWrite(t, WARNING, fmt.Sprintf("warning %s", msg))
+	l.l.Infof("info %s, %d, %2.f, %t", "testing", 12, 3.44534, false)
+	checkWrite(t, INFO, fmt.Sprintf("info %s", msg))
+}
+
 func TestGetLog(t *testing.T) {
 	err := l.l.Write(testLog, "INFO")
 	if err != nil {

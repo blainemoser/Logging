@@ -74,6 +74,26 @@ func (l *Log) Info(message string) (err error) {
 	return l.Write(message, INFO)
 }
 
+func (l *Log) Errorf(message string, vars ...interface{}) (err error) {
+	return l.Error(fmt.Sprintf(message, vars...))
+}
+
+func (l *Log) Successf(message string, vars ...interface{}) (err error) {
+	return l.Success(fmt.Sprintf(message, vars...))
+}
+
+func (l *Log) Warningf(message string, vars ...interface{}) (err error) {
+	return l.Warning(fmt.Sprintf(message, vars...))
+}
+
+func (l *Log) Debugf(message string, vars ...interface{}) (err error) {
+	return l.Debug(fmt.Sprintf(message, vars...))
+}
+
+func (l *Log) Infof(message string, vars ...interface{}) (err error) {
+	return l.Info(fmt.Sprintf(message, vars...))
+}
+
 func (l *Log) logMessage(level, message string) []byte {
 	return []byte(
 		fmt.Sprintf(
