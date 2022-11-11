@@ -110,7 +110,7 @@ func (l *Log) Write(message, level string) (err error) {
 		return err
 	}
 	defer l.file.Close()
-	_, err = l.file.Write(msg)
+	_, err = l.file.Write(append(msg, []byte("\n")...))
 	return err
 }
 
@@ -157,7 +157,7 @@ func (l *Log) Infof(message string, vars ...interface{}) (err error) {
 func (l *Log) logMessage(level, message string) []byte {
 	return []byte(
 		fmt.Sprintf(
-			"[%s] [%s.%s] %s\n",
+			"[%s] [%s.%s] %s",
 			time.Now().UTC().Format(time.RFC3339),
 			l.env,
 			level,
