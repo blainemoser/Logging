@@ -52,6 +52,29 @@ func TestLevels(t *testing.T) {
 	checkWrite(t, INFO, "info")
 }
 
+func TestLogAndReportLevels(t *testing.T) {
+	result := LogLevel("debug")
+	if result != LEVEL_DEBUG {
+		t.Errorf("expected result/log level to be %d, got %d", LEVEL_DEBUG, result)
+	}
+	result = LogLevel("unrecognised")
+	if result != LEVEL_INFO {
+		t.Errorf("expected result/log level to be %d, got %d", LEVEL_INFO, result)
+	}
+	result = ReportLevel("warning")
+	if result != REPORT_LEVEL_WARNING {
+		t.Errorf("expected result/report level to be %d, got %d", REPORT_LEVEL_WARNING, result)
+	}
+	result = ReportLevel("none")
+	if result != REPORT_LEVEL_NONE {
+		t.Errorf("expected result/report level to be %d, got %d", REPORT_LEVEL_NONE, result)
+	}
+	result = ReportLevel("unrecognised")
+	if result != REPORT_LEVEL_INFO {
+		t.Errorf("expected result/report level to be %d, got %d", REPORT_LEVEL_INFO, result)
+	}
+}
+
 func TestLevelsf(t *testing.T) {
 	args := []interface{}{"testing", 12, 3.44534, false}
 	msg := fmt.Sprintf("%s, %d, %2.f, %t", args...)

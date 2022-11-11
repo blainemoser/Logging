@@ -15,6 +15,7 @@ const (
 	INFO                 = "INFO"
 	SUCCESS              = "SUCCESS"
 	DEBUG                = "DEBUG"
+	NONE                 = "NONE"
 	LEVEL_ERROR          = 0
 	LEVEL_WARNING        = 1
 	LEVEL_DEBUG          = 2
@@ -34,6 +35,7 @@ var logLevels map[string]int = map[string]int{
 }
 
 var reportLevels map[string]int = map[string]int{
+	NONE:    REPORT_LEVEL_NONE,
 	ERROR:   REPORT_LEVEL_ERROR,
 	WARNING: REPORT_LEVEL_WARNING,
 	INFO:    REPORT_LEVEL_INFO,
@@ -65,6 +67,36 @@ func NewLog(path, env string, logLevel, reportLevel int) (l *Log, err error) {
 		return nil, err
 	}
 	return l, nil
+}
+
+// LogLevel returns the appropriate level from a string input (case insensitive)
+// Note that the levels are (in ascending order of sensitivity)
+// ERROR | WARNING | DEBUG | INFO
+// Debug and info are at the same level and can be used interchangeably
+// If level is unrecognised logging will be set to the most sensitive; in other words,
+// the function will return the level INFO
+func LogLevel(level string) int {
+	level = strings.ToUpper(level)
+	ll, ok := logLevels[level]
+	if !ok {
+		return LEVEL_INFO
+	}
+	return ll
+}
+
+// ReportLevel returns the appropriate reporting level from a string input
+// Note that the levels are (in ascending order of sensitivity)
+// NONE | ERROR | WARNING | DEBUG | INFO
+// Debug and info are at the same level and can be used interchangeably
+// If level is unrecognised logging will be set to the most sensitive; in other words,
+// the function will return the reporting level INFO
+func ReportLevel(level string) int {
+	level = strings.ToUpper(level)
+	rl, ok := reportLevels[level]
+	if !ok {
+		return REPORT_LEVEL_INFO
+	}
+	return rl
 }
 
 func (l *Log) Write(message, level string) (err error) {
