@@ -62,16 +62,16 @@ func TestLogAndReportLevels(t *testing.T) {
 		t.Errorf("expected result/log level to be %d, got %d", LEVEL_INFO, result)
 	}
 	result = ReportLevel("warning")
-	if result != REPORT_LEVEL_WARNING {
-		t.Errorf("expected result/report level to be %d, got %d", REPORT_LEVEL_WARNING, result)
+	if result != LEVEL_WARNING {
+		t.Errorf("expected result/report level to be %d, got %d", LEVEL_WARNING, result)
 	}
 	result = ReportLevel("none")
-	if result != REPORT_LEVEL_NONE {
-		t.Errorf("expected result/report level to be %d, got %d", REPORT_LEVEL_NONE, result)
+	if result != LEVEL_NONE {
+		t.Errorf("expected result/report level to be %d, got %d", LEVEL_NONE, result)
 	}
 	result = ReportLevel("unrecognised")
-	if result != REPORT_LEVEL_INFO {
-		t.Errorf("expected result/report level to be %d, got %d", REPORT_LEVEL_INFO, result)
+	if result != LEVEL_INFO {
+		t.Errorf("expected result/report level to be %d, got %d", LEVEL_INFO, result)
 	}
 }
 
@@ -150,7 +150,7 @@ func TestLogPath(t *testing.T) {
 }
 
 func TestReporting(t *testing.T) {
-	err := spinTestLog(LEVEL_ERROR, REPORT_LEVEL_DEBUG)
+	err := spinTestLog(LEVEL_ERROR, LEVEL_DEBUG)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -168,7 +168,7 @@ func TestReporting(t *testing.T) {
 }
 
 func TestCustomLevel(t *testing.T) {
-	err := spinTestLog(LEVEL_ERROR, REPORT_LEVEL_NONE) // Lowest possible sensitivity
+	err := spinTestLog(LEVEL_ERROR, LEVEL_NONE) // Lowest possible sensitivity
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +178,7 @@ func TestCustomLevel(t *testing.T) {
 }
 
 func initialiseTest() {
-	err := spinTestLog(LEVEL_INFO, REPORT_LEVEL_INFO)
+	err := spinTestLog(LEVEL_INFO, LEVEL_INFO)
 	if err != nil {
 		os.Remove(l.filePath)
 		panic(err)

@@ -10,36 +10,25 @@ import (
 )
 
 const (
-	ERROR                = "ERROR"
-	WARNING              = "WARNING"
-	INFO                 = "INFO"
-	SUCCESS              = "SUCCESS"
-	DEBUG                = "DEBUG"
-	NONE                 = "NONE"
-	LEVEL_ERROR          = 0
-	LEVEL_WARNING        = 1
-	LEVEL_DEBUG          = 2
-	LEVEL_INFO           = 2
-	REPORT_LEVEL_NONE    = 0
-	REPORT_LEVEL_ERROR   = 1
-	REPORT_LEVEL_WARNING = 2
-	REPORT_LEVEL_DEBUG   = 3
-	REPORT_LEVEL_INFO    = 3
+	ERROR         = "ERROR"
+	WARNING       = "WARNING"
+	INFO          = "INFO"
+	SUCCESS       = "SUCCESS"
+	DEBUG         = "DEBUG"
+	NONE          = "NONE"
+	LEVEL_NONE    = 0
+	LEVEL_ERROR   = 1
+	LEVEL_WARNING = 2
+	LEVEL_DEBUG   = 3
+	LEVEL_INFO    = 4
 )
 
 var logLevels map[string]int = map[string]int{
+	NONE:    LEVEL_NONE,
 	ERROR:   LEVEL_ERROR,
 	WARNING: LEVEL_WARNING,
 	INFO:    LEVEL_INFO,
 	DEBUG:   LEVEL_DEBUG,
-}
-
-var reportLevels map[string]int = map[string]int{
-	NONE:    REPORT_LEVEL_NONE,
-	ERROR:   REPORT_LEVEL_ERROR,
-	WARNING: REPORT_LEVEL_WARNING,
-	INFO:    REPORT_LEVEL_INFO,
-	DEBUG:   REPORT_LEVEL_DEBUG,
 }
 
 type Log struct {
@@ -58,7 +47,7 @@ var (
 func NewLog(path, env string, logLevel, reportLevel int) (l *Log, err error) {
 	l = &Log{
 		level:       getLogLevel(logLevel),
-		reportLevel: getReportLevel(reportLevel),
+		reportLevel: getLogLevel(reportLevel),
 		path:        path,
 		env:         env,
 	}
@@ -92,9 +81,9 @@ func LogLevel(level string) int {
 // the function will return the reporting level INFO
 func ReportLevel(level string) int {
 	level = strings.ToUpper(level)
-	rl, ok := reportLevels[level]
+	rl, ok := logLevels[level]
 	if !ok {
-		return REPORT_LEVEL_INFO
+		return LEVEL_INFO
 	}
 	return rl
 }
@@ -326,10 +315,10 @@ func (l *Log) shouldWrite(level string) bool {
 }
 
 func (l *Log) report(level string, msg []byte) {
-	if l.reportLevel <= REPORT_LEVEL_NONE {
+	if l.reportLevel <= LEVEL_NONE {
 		return
 	}
-	reportLevel, ok := reportLevels[level]
+	reportLevel, ok := logLevels[level]
 	if !ok || reportLevel <= l.reportLevel {
 		reportMsg(msg)
 		return
@@ -342,20 +331,10 @@ func reportMsg(msg []byte) {
 
 func getLogLevel(level int) int {
 	if level <= 0 {
-		return LEVEL_ERROR
+		return LEVEL_NONE
 	}
-	if level > LEVEL_DEBUG {
-		return LEVEL_DEBUG // highest level
-	}
-	return level
-}
-
-func getReportLevel(level int) int {
-	if level <= 0 {
-		return REPORT_LEVEL_NONE
-	}
-	if level > REPORT_LEVEL_DEBUG {
-		return REPORT_LEVEL_DEBUG // highest level
+	if level > LEVEL_INFO {
+		return LEVEL_INFO // highest level
 	}
 	return level
 }
