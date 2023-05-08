@@ -51,7 +51,7 @@ func NewLog(path, env string, logLevel, reportLevel int) (l *Log, err error) {
 		path:        path,
 		env:         env,
 	}
-	err = l.Write("initialising log", "INFO")
+	_, err = l.Write("initialising log", "INFO")
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func ReportLevel(level string) int {
 	return rl
 }
 
-func (l *Log) Write(message, level string) (err error) {
+func (l *Log) Write(message, level string) (result string, err error) {
 	msg := l.logMessage(level, message)
 	l.report(level, msg)
 	if !l.shouldWrite(level) {
@@ -96,50 +96,51 @@ func (l *Log) Write(message, level string) (err error) {
 	}
 	err = l.openLogForWrite()
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer l.file.Close()
 	_, err = l.file.Write(append(msg, []byte("\n")...))
-	return err
+	result = string(msg)
+	return
 }
 
-func (l *Log) Error(message string) (err error) {
+func (l *Log) Error(message string) (string, error) {
 	return l.Write(message, ERROR)
 }
 
-func (l *Log) Success(message string) (err error) {
+func (l *Log) Success(message string) (string, error) {
 	return l.Write(message, SUCCESS)
 }
 
-func (l *Log) Warning(message string) (err error) {
+func (l *Log) Warning(message string) (string, error) {
 	return l.Write(message, WARNING)
 }
 
-func (l *Log) Debug(message string) (err error) {
+func (l *Log) Debug(message string) (string, error) {
 	return l.Write(message, DEBUG)
 }
 
-func (l *Log) Info(message string) (err error) {
+func (l *Log) Info(message string) (string, error) {
 	return l.Write(message, INFO)
 }
 
-func (l *Log) Errorf(message string, vars ...interface{}) (err error) {
+func (l *Log) Errorf(message string, vars ...interface{}) (string, error) {
 	return l.Error(fmt.Sprintf(message, vars...))
 }
 
-func (l *Log) Successf(message string, vars ...interface{}) (err error) {
+func (l *Log) Successf(message string, vars ...interface{}) (string, error) {
 	return l.Success(fmt.Sprintf(message, vars...))
 }
 
-func (l *Log) Warningf(message string, vars ...interface{}) (err error) {
+func (l *Log) Warningf(message string, vars ...interface{}) (string, error) {
 	return l.Warning(fmt.Sprintf(message, vars...))
 }
 
-func (l *Log) Debugf(message string, vars ...interface{}) (err error) {
+func (l *Log) Debugf(message string, vars ...interface{}) (string, error) {
 	return l.Debug(fmt.Sprintf(message, vars...))
 }
 
-func (l *Log) Infof(message string, vars ...interface{}) (err error) {
+func (l *Log) Infof(message string, vars ...interface{}) (string, error) {
 	return l.Info(fmt.Sprintf(message, vars...))
 }
 

@@ -91,13 +91,19 @@ func TestLevelsf(t *testing.T) {
 }
 
 func TestGetLog(t *testing.T) {
-	err := l.l.Write(testLog, "INFO")
+	result, err := l.l.Write(testLog, "INFO")
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = l.l.Write(testLogTwo, "INFO")
+	if !strings.Contains(result, testLog) {
+		t.Errorf("expected test log result to contain '%s', got '%s'", testLog, result)
+	}
+	result, err = l.l.Write(testLogTwo, "INFO")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if !strings.Contains(result, testLogTwo) {
+		t.Errorf("expected test log result to contain '%s', got '%s'", testLogTwo, result)
 	}
 	getLogOne(t)
 	getLogTwo(t)
