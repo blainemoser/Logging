@@ -269,15 +269,15 @@ func (l *Log) reverseNode(node *[]string) {
 	}
 }
 
-func (l *Log) ErrLog(e error, fatal bool) {
+func (l *Log) ErrLog(e error, fatal bool) string {
 	if fatal {
 		l.Write(e.Error(), "FATAL")
 		l.file.Close()
 		log.Fatal(e)
-		return
+		return ""
 	}
-	l.Write(e.Error(), "ERROR")
-	log.Println(e)
+	message, _ := l.Write(e.Error(), "ERROR")
+	return message
 }
 
 func (l *Log) openLogForWrite() error {
